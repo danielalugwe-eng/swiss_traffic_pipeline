@@ -18,7 +18,6 @@
     - [Option A — Local (Python + Bruin)](#option-a--local-python--bruin)
     - [Option B — Docker (recommended)](#option-b--docker-recommended)
 11. [Output Files](#output-files)
-12. [Looker Studio Dashboards](#looker-studio-dashboards)
 
 ---
 
@@ -1106,30 +1105,6 @@ docker compose cp pipeline:/app/models ./models
 | `predictions_scatter.png` | `reports/` | Predicted vs Actual scatter |
 | `feature_importance.png` | `reports/` | RF/GBM feature importance |
 | `best_model.pkl` | `models/` | Serialized best-performing model |
-
----
-
-## Looker Studio Dashboards
-
-The pipeline writes directly to BigQuery after every run. Looker Studio connects to BigQuery natively — no CSV uploads needed.
-
-| BigQuery table | Rows | Use for |
-|----------------|------|---------|
-| `monthly_traffic` | ~24,000 | Main fact table — all stations × months × metrics |
-| `stations` | ~403 | Station dimension / master list |
-| `romandy_summary` | 6 | Canton KPIs and seasonal variation |
-| `traffic_features` | ~330 | ML engineered features (summer ratio, HGV %, etc.) |
-| `predictions` | ~82 | Q4 2025 predictions + 2026 estimates |
-| `quality_gates` | ~15 | Model evaluation pass/fail results |
-
-For the full setup guide including:
-- How to upload CSVs to Google Sheets
-- How to connect to Looker Studio
-- Every column explained with examples
-- Step-by-step chart recipes for 4 dashboard pages
-- Data cleaning details for each transformation applied
-
-**→ See [LOOKER_STUDIO.md](LOOKER_STUDIO.md)**
 
 ---
 
