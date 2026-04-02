@@ -1,0 +1,9 @@
+# This file exists only to make git track the reports/ directory.
+# Git does not track empty folders; adding this placeholder ensures
+# the reports/ directory appears in the repository so team members
+# who clone the project have the correct folder structure.
+#
+# All HTML reports and PNG charts will be generated here when you run:
+#   bruin run --asset reporting.generate_reports
+#   bruin run --asset ml.evaluate_model
+#   bruin run --asset ml.predict_traffic

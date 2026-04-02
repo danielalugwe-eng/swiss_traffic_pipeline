@@ -1,0 +1,61 @@
+# =============================================================================
+# .dockerignore — Files to exclude from the Docker build context
+# =============================================================================
+#
+# WHY THIS MATTERS:
+# When you run `docker build .`, Docker sends everything in the current folder
+# to the Docker daemon as the "build context". Without this file, it would
+# send your entire .venv (hundreds of MB), mlruns experiments, the DuckDB
+# file, and all cached Python bytecode.
+#
+# This file tells Docker: "skip these when building the image".
+# Result: faster builds, smaller image layers.
+# =============================================================================
+
+# ── Python virtual environment ─────────────────────────────────────────────────
+# The container installs its own packages via pip/uv.
+# Your local .venv is Windows-compiled and won't work on Linux anyway.
+.venv/
+venv/
+env/
+
+# ── Python bytecode cache ──────────────────────────────────────────────────────
+# These are auto-generated and OS-specific. Not needed in the image.
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# ── DuckDB database file ───────────────────────────────────────────────────────
+# The pipeline creates this fresh on every run. Don't bake stale data into
+# the image. It's provided via a Docker volume instead.
+traffic.duckdb
+*.duckdb
+
+# ── Generated outputs (managed by Docker volumes) ─────────────────────────────
+# These are outputs, not inputs. They live in named volumes, not in the image.
+reports/
+models/
+mlruns/
+
+# ── Git internals ──────────────────────────────────────────────────────────────
+.git/
+.gitignore
+
+# ── Editor and OS files ────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Temporary / helper scripts ────────────────────────────────────────────────
+check_csv.py
+check_schema.py
+
+# ── Bruin local state ─────────────────────────────────────────────────────────
+.bruin/
+
+# ── Jupyter notebooks (if any) ────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb

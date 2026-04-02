@@ -1,0 +1,6 @@
+# This file exists only to make git track the models/ directory.
+# Git does not track empty folders; adding this placeholder ensures
+# the models/ directory appears in the repository so team members
+# who clone the project have the correct folder structure.
+#
+# best_model.pkl will be generated here by: bruin run --asset ml.train_model

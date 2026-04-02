@@ -1,0 +1,83 @@
+# =============================================================================
+# pipeline.yml — Swiss Traffic MLOps Pipeline Definition
+# =============================================================================
+#
+# WHAT IS A PIPELINE?
+# Imagine a factory assembly line. Raw materials (CSV files) come in at one end,
+# pass through different machines (assets) that shape and transform them,
+# and finished products (reports, predictions, model files) come out the other end.
+#
+# Each "machine" on our assembly line is called an ASSET.
+# Every asset does exactly one job well (Unix philosophy).
+#
+# PIPELINE EXECUTION ORDER (Bruin resolves this automatically from `depends`):
+#
+#  CSV FILES (disk)
+#      │
+#      ▼
+#  [1] raw.ingest_traffic_csv        ← Parse CSVs → load into DuckDB
+#      │
+#      ├──────────────────────────────────────┐
+#      ▼                                      ▼
+#  [2] staging.stg_stations          [3] staging.stg_monthly_traffic
+#      │                                      │
+#      └──────────────┬───────────────────────┘
+#                     ▼
+#              [4] mart.traffic_features       ← ML-ready feature table
+#                     │
+#          ┌──────────┼──────────┐
+#          ▼          ▼          ▼
+#  [5] mart.lausanne  [6] mart.romandy  [7] mart.station_health
+#      _analysis          _summary
+#          │                   │
+#          └──────────┬────────┘
+#                     ▼
+#            [8] reporting.generate_reports   ← Charts + HTML
+#                     │
+#                     ▼
+#             [9] ml.train_model              ← Train RF + GBM models
+#                     │
+#                     ▼
+#            [10] ml.evaluate_model           ← Score on held-out data
+#                     │
+#                     ▼
+#            [11] ml.predict_traffic          ← Generate predictions
+#
+# WHAT IS A DAG?
+# The above diagram is a DAG = "Directed Acyclic Graph"
+# Directed = arrows flow one way (you can't go backwards)
+# Acyclic  = no loops (asset A can't depend on asset B if B depends on A)
+# Graph    = a network of connected nodes
+# Bruin uses the DAG to figure out what order to run things and what can run in parallel.
+#
+# SCHEDULE EXPLAINED:
+# "@daily" means this pipeline runs once per day at midnight.
+# In production, you'd get fresh CSV exports from FEDRO daily.
+# For this project with static 2025 data, we run it manually:
+#   bruin run .
+# =============================================================================
+
+name: swiss-traffic-mlops
+schedule: "@daily"
+start_date: "2025-01-01"
+
+# Which DuckDB connection (from .bruin.yml) should SQL assets use by default?
+# Every SQL asset of type "duckdb.sql" will automatically use this connection
+# unless they explicitly specify a different one.
+default_connections:
+  duckdb: "duckdb_traffic"
+
+# Tags help you filter and organize assets.
+# Run only ML assets:   bruin run --tag ml .
+# Run only reporting:   bruin run --tag reporting .
+tags:
+  - traffic
+  - switzerland
+  - romandy
+  - mlops
+  - fedro
+
+# How many assets can run at the same time?
+# DuckDB doesn't support true concurrent writes, so keep this at 1 for safety.
+# When using a cloud database (BigQuery, Snowflake), you'd increase this to 8-16.
+concurrency: 1

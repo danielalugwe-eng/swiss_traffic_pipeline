@@ -1,0 +1,137 @@
+# =============================================================================
+# docker-compose.yml — Swiss Traffic MLOps Pipeline
+# =============================================================================
+#
+# WHAT IS DOCKER COMPOSE?
+# Docker Compose lets you define MULTIPLE containers and how they talk to
+# each other in one file. You start them all with one command.
+#
+# OUR SETUP: two services
+#
+#  ┌──────────────────────────────────────────────────────────┐
+#  │  pipeline service                                         │
+#  │  - Runs the full 7-stage Bruin pipeline                   │
+#  │  - Reads CSVs from ./data volume                          │
+#  │  - Writes traffic.duckdb, reports/, models/ to volumes    │
+#  └──────────────────────────────────────────────────────────┘
+#                           │ shares mlruns/ volume
+#  ┌──────────────────────────────────────────────────────────┐
+#  │  mlflow service                                           │
+#  │  - Runs `mlflow ui` — a web dashboard                     │
+#  │  - Reads from the same mlruns/ volume                     │
+#  │  - Exposed at http://localhost:5000                        │
+#  └──────────────────────────────────────────────────────────┘
+#
+# USAGE:
+#   Run the full pipeline:
+#     docker compose up pipeline
+#
+#   Start the MLflow UI (and keep it running):
+#     docker compose up mlflow
+#
+#   Run pipeline + launch MLflow UI together:
+#     docker compose up
+#
+#   Force a clean rebuild (e.g. after changing Dockerfile):
+#     docker compose up --build pipeline
+#
+#   Stream live logs:
+#     docker compose logs -f pipeline
+#
+#   Open a shell inside the container for debugging:
+#     docker compose run --rm pipeline bash
+# =============================================================================
+
+services:
+
+  # ── Service 1: Pipeline ────────────────────────────────────────────────────
+  pipeline:
+    build:
+      context: .            # Build the Dockerfile in the current directory
+      dockerfile: Dockerfile
+    image: swiss-traffic:latest   # Tag the built image with this name
+
+    container_name: swiss-traffic-pipeline
+
+    # VOLUMES: bind-mount host directories into the container.
+    # Format:  ./host/path:/container/path
+    #
+    # Why volumes instead of COPY?
+    # - CSVs and the DuckDB file are DATA, not code. They live outside the image.
+    # - Any files written inside these paths survive container restarts.
+    # - You can swap in new FEDRO CSV files without rebuilding the image.
+    volumes:
+      # The 4 FEDRO CSV files (read from project root on host)
+      - .:/app
+      # Persist the DuckDB database across runs
+      - duckdb_data:/app/traffic.duckdb
+      # Persist generated reports (HTML, PNGs, CSVs)
+      - reports_data:/app/reports
+      # Persist trained model files
+      - models_data:/app/models
+      # Shared MLflow experiment tracking (also read by mlflow service)
+      - mlruns_data:/app/mlruns
+
+    environment:
+      # Non-interactive matplotlib backend (no display in container)
+      - MPLBACKEND=Agg
+      # Unbuffered Python output → logs appear immediately
+      - PYTHONUNBUFFERED=1
+      # MLflow reads/writes experiments here (shared with mlflow service)
+      - MLFLOW_TRACKING_URI=/app/mlruns
+
+    # By default, run the full pipeline
+    command: python run_pipeline.py
+
+    # Don't restart automatically — pipeline is a one-shot job, not a server.
+    restart: "no"
+
+  # ── Service 2: MLflow UI ───────────────────────────────────────────────────
+  mlflow:
+    # Re-use the same image (MLflow is already installed in it)
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: swiss-traffic:latest
+
+    container_name: swiss-traffic-mlflow
+
+    # Override the default CMD to run the MLflow web server instead of pipeline
+    command: >
+      mlflow ui
+      --host 0.0.0.0
+      --port 5000
+      --backend-store-uri /app/mlruns
+
+    volumes:
+      # Mount the same mlruns volume so the UI can read pipeline experiments
+      - mlruns_data:/app/mlruns
+
+    ports:
+      # Expose MLflow UI to your host browser at http://localhost:5000
+      - "5000:5000"
+
+    environment:
+      - PYTHONUNBUFFERED=1
+
+    # Keep the UI running until you stop it manually
+    restart: unless-stopped
+
+    # MLflow UI is only useful AFTER the pipeline has run at least once
+    depends_on:
+      - pipeline
+
+# ── Named Volumes ──────────────────────────────────────────────────────────────
+# Named volumes are managed by Docker. They persist on your host machine in
+# Docker's internal storage area (not a visible folder — use `docker volume ls`).
+#
+# To wipe all data and start fresh:
+#   docker compose down -v
+#
+# To inspect a volume:
+#   docker volume inspect swiss_trafficc_data_mlruns_data
+volumes:
+  duckdb_data:
+  reports_data:
+  models_data:
+  mlruns_data:

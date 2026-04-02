@@ -1,0 +1,91 @@
+[project]
+# =============================================================================
+# pyproject.toml — Python Dependencies for the Swiss Traffic MLOps Pipeline
+# =============================================================================
+#
+# WHAT IS THIS FILE?
+# This is the "shopping list" for Python packages that our pipeline needs.
+# When Bruin runs a Python asset, it looks for this file and installs
+# exactly these packages (using the blazing-fast `uv` package manager).
+#
+# WHY NOT requirements.txt?
+# pyproject.toml is the modern Python standard (PEP 517/518).
+# It includes the project name, version, Python version constraints,
+# and dependency versions — all in one place.
+# requirements.txt is the "old" way. Both work; pyproject.toml is preferred.
+#
+# HOW BRUIN FINDS THIS FILE:
+# Bruin searches upward from each Python asset's location until it finds
+# this file. Since it's at the project root, all Python assets share the same
+# dependency set.
+#
+# PACKAGE EXPLANATIONS:
+# ─── DATA LAYER ───────────────────────────────────────────────────────────────
+# pandas:     The Swiss Army knife of data tables in Python.
+#             Like Excel, but programmable and 100x faster.
+#             We use it to read, clean, and reshape the CSV data.
+#
+# numpy:      The math engine under the hood.
+#             Pandas NEEDS numpy. Also used for numerical operations.
+#             Like the calculator chips inside your GPS device.
+#
+# duckdb:     Local analytical database engine (no server needed!).
+#             We store all cleaned data here and query it with SQL.
+#             Imagine SQLite, but built for analytics workloads.
+#
+# ─── MACHINE LEARNING ─────────────────────────────────────────────────────────
+# scikit-learn: The standard ML toolkit in Python.
+#             Contains Linear Regression, Random Forest, Gradient Boosting,
+#             and all the tools for train/test splitting, scaling, and scoring.
+#             Like a Swiss army knife for ML — everything in one package.
+#
+# mlflow:     MLflow tracks every experiment we run.
+#             Every time you train a model, mlflow records:
+#               - What parameters you used (n_estimators=100, max_depth=5)
+#               - What metrics you got (MAE=423, RMSE=671, R²=0.94)
+#               - The model file itself (so you can reload it later)
+#             Like a scientist's lab notebook, but digital and automatic.
+#
+# joblib:     Fast serialization (saving/loading) of Python objects.
+#             We use it to save trained model files to disk.
+#             Like a professional packaging system for your trained models.
+#
+# ─── VISUALIZATION ────────────────────────────────────────────────────────────
+# matplotlib: The foundation of Python charting.
+#             Creates static publication-quality charts (PNG/PDF).
+#             Like MS Paint, but for engineers.
+#
+# seaborn:    Beautiful statistical charts built on matplotlib.
+#             Makes heatmaps, box plots, and regression plots much easier.
+#             Like matplotlib wearing a designer suit.
+#
+# ─── REPORTING ────────────────────────────────────────────────────────────────
+# jinja2:     Template engine for generating HTML reports.
+#             We fill in a template with data → produces an HTML file.
+#             Like a mail-merge letter template, but for web pages.
+#
+# =============================================================================
+
+name = "swiss-traffic-mlops"
+version = "0.1.0"
+description = "Full MLOps pipeline for Swiss Federal Roads Office traffic data, focusing on French-speaking Switzerland (Romandy). Includes data ingestion, transformation, historical reporting, and ML-based traffic volume prediction."
+requires-python = ">=3.10"
+
+dependencies = [
+    # ── Data Layer ──────────────────────────────────────────────────────────
+    "pandas>=2.1.0",          # DataFrames, CSV reading, data manipulation
+    "numpy>=1.26.0",          # Numerical computing (pandas dependency + ML math)
+    "duckdb>=0.10.0",         # Embedded analytical SQL database (no server needed)
+    # ── Machine Learning ─────────────────────────────────────────────────────
+    "scikit-learn>=1.4.0",    # Core ML algorithms: LinearReg, RandomForest, GBM
+    "mlflow>=2.11.0",         # Experiment tracking, model registry, reproducibility
+    "joblib>=1.3.0",          # Fast model serialization (saving/loading .pkl files)
+    # ── Visualization ────────────────────────────────────────────────────────
+    "matplotlib>=3.8.0",      # Core charting library (bar, line, scatter plots)
+    "seaborn>=0.13.0",        # Statistical visualization (heatmaps, distributions)
+    # ── Reporting ────────────────────────────────────────────────────────────
+    "jinja2>=3.1.0",          # HTML report template rendering
+    # ── BigQuery / Looker Studio export ──────────────────────────────────────
+    "pandas-gbq>=0.23.0",     # Upload DataFrames to BigQuery (Looker Studio source)
+    "google-auth>=2.49.1",
+]

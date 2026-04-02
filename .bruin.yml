@@ -1,0 +1,46 @@
+# =============================================================================
+# .bruin.yml — Bruin Project Configuration File
+# =============================================================================
+#
+# WHAT IS THIS FILE?
+# Think of this file as the "phone book" or "settings menu" of your project.
+# It tells Bruin where your databases live and how to connect to them.
+# Without this file, Bruin doesn't know where to save or read data.
+#
+# WHY IS IT IN .gitignore?
+# In a real project, this file would contain passwords and API keys,
+# which should NEVER be committed to git. Bruin adds it automatically.
+# For this local project, there are no secrets — just a local file path.
+#
+# FILE LOCATION RULE:
+# This file MUST be at the root of your project folder (same level as pipeline.yml).
+# Bruin searches from your current directory upward to find it.
+#
+# ENVIRONMENTS EXPLAINED:
+# An "environment" is like a profile on your phone.
+# - "default" profile = your daily driver (local development)
+# - "staging" profile = a test server that mirrors production
+# - "production" profile = the real thing serving real users
+# Here we only have "default" because this is a local analytics project.
+#
+# CONNECTION TYPES SUPPORTED:
+# DuckDB (local file), PostgreSQL, BigQuery, Snowflake, Redshift, and 20+ more.
+# We use DuckDB because:
+#   ✓ No server needed — works as a single file (like SQLite but MUCH faster)
+#   ✓ Excellent for analytical queries on large CSV files
+#   ✓ Free and open-source
+#   ✓ Handles NULL values and complex SQL aggregations beautifully
+# =============================================================================
+
+default_environment: default
+
+environments:
+  default:
+    connections:
+      duckdb:
+        - name: "duckdb_traffic"
+          # Path to the DuckDB database file.
+          # The file is created automatically by Bruin if it doesn't exist.
+          # All pipeline data (raw + staging + mart tables) lives in this single file.
+          # It will be roughly 1-5 MB for this dataset.
+          path: "./traffic.duckdb"

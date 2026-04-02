@@ -1,0 +1,87 @@
+{
+  "overall_pass": false,
+  "generated_at": "2026-03-30T09:52:59.911738",
+  "thresholds": {
+    "min_r2": 0.8,
+    "max_mape_pct": 15.0,
+    "max_canton_mape": 25.0,
+    "max_station_err": 50.0
+  },
+  "gates": {
+    "adt_oct": {
+      "r2": {
+        "value": 0.9993,
+        "threshold": 0.8,
+        "pass": true
+      },
+      "mape": {
+        "value": 0.91,
+        "threshold": 15.0,
+        "pass": "True"
+      },
+      "worst_canton": {
+        "canton": "TI",
+        "mape": 3.24,
+        "threshold": 25.0,
+        "pass": true
+      },
+      "worst_station": {
+        "station": "FONTANA, VALLE BEDRETTO - TI0917",
+        "mape": 43.16,
+        "threshold": 50.0,
+        "pass": true
+      },
+      "target_pass": true
+    },
+    "adt_nov": {
+      "r2": {
+        "value": 0.9999,
+        "threshold": 0.8,
+        "pass": true
+      },
+      "mape": {
+        "value": 1.06,
+        "threshold": 15.0,
+        "pass": "True"
+      },
+      "worst_canton": {
+        "canton": "TI",
+        "mape": 4.38,
+        "threshold": 25.0,
+        "pass": true
+      },
+      "worst_station": {
+        "station": "FONTANA, VALLE BEDRETTO - TI0917",
+        "mape": 71.64,
+        "threshold": 50.0,
+        "pass": false
+      },
+      "target_pass": false
+    },
+    "adt_dec": {
+      "r2": {
+        "value": 1.0,
+        "threshold": 0.8,
+        "pass": true
+      },
+      "mape": {
+        "value": 0.2,
+        "threshold": 15.0,
+        "pass": "True"
+      },
+      "worst_canton": {
+        "canton": "TI",
+        "mape": 0.64,
+        "threshold": 25.0,
+        "pass": true
+      },
+      "worst_station": {
+        "station": "FONTANA, VALLE BEDRETTO - TI0917",
+        "mape": 10.46,
+        "threshold": 50.0,
+        "pass": true
+      },
+      "target_pass": true
+    }
+  }
+}
